@@ -1,9 +1,11 @@
 package ru.yandex.practicum.telemetry.collector.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.grpc.telemetry.event.DeviceActionProto;
 import ru.yandex.practicum.kafka.telemetry.event.ActionTypeAvro;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceActionAvro;
 
+@UtilityClass
 public class DeviceActionMapper {
     public static DeviceActionAvro protoToAvro(DeviceActionProto action) {
         return DeviceActionAvro.newBuilder()
