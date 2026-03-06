@@ -5,12 +5,13 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.TemperatureSensorProto;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.TemperatureSensorAvro;
 import ru.yandex.practicum.telemetry.collector.config.CollectorClient;
-import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEvent;
-import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEventType;
-import ru.yandex.practicum.telemetry.collector.model.sensor.TemperatureSensorEvent;
+
+import java.time.Instant;
 
 @Component
 public class TemperatureSensorEventHandler extends SensorEventHandler {
@@ -22,13 +23,13 @@ public class TemperatureSensorEventHandler extends SensorEventHandler {
     }
 
     @Override
-    public SensorEventType getEventType() {
-        return SensorEventType.TEMPERATURE_SENSOR_EVENT;
+    public SensorEventProto.PayloadCase getEventType() {
+        return SensorEventProto.PayloadCase.TEMPERATURE_SENSOR;
     }
 
     @Override
-    public void handle(SensorEvent event) {
-        TemperatureSensorEvent temperatureEvent = (TemperatureSensorEvent) event;
+    public void handle(SensorEventProto event) {
+        TemperatureSensorProto temperatureEvent = event.getTemperatureSensor();
 
         TemperatureSensorAvro data = TemperatureSensorAvro.newBuilder()
                 .setTemperatureC(temperatureEvent.getTemperatureC())
@@ -38,7 +39,7 @@ public class TemperatureSensorEventHandler extends SensorEventHandler {
         SensorEventAvro eventAvro = SensorEventAvro.newBuilder()
                 .setHubId(event.getHubId())
                 .setId(event.getId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(data)
                 .build();
 

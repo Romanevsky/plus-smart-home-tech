@@ -5,12 +5,13 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.LightSensorProto;
+import ru.yandex.practicum.grpc.telemetry.event.SensorEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.LightSensorAvro;
 import ru.yandex.practicum.kafka.telemetry.event.SensorEventAvro;
 import ru.yandex.practicum.telemetry.collector.config.CollectorClient;
-import ru.yandex.practicum.telemetry.collector.model.sensor.LightSensorEvent;
-import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEvent;
-import ru.yandex.practicum.telemetry.collector.model.sensor.SensorEventType;
+
+import java.time.Instant;
 
 @Component
 public class LightSensorEventHandler extends SensorEventHandler {
@@ -22,13 +23,13 @@ public class LightSensorEventHandler extends SensorEventHandler {
     }
 
     @Override
-    public SensorEventType getEventType() {
-        return SensorEventType.LIGHT_SENSOR_EVENT;
+    public SensorEventProto.PayloadCase getEventType() {
+        return SensorEventProto.PayloadCase.LIGHT_SENSOR;
     }
 
     @Override
-    public void handle(SensorEvent event) {
-        LightSensorEvent lightEvent = (LightSensorEvent) event;
+    public void handle(SensorEventProto event) {
+        LightSensorProto lightEvent = event.getLightSensor();
 
         LightSensorAvro data = LightSensorAvro.newBuilder()
                 .setLinkQuality(lightEvent.getLinkQuality())
@@ -38,7 +39,7 @@ public class LightSensorEventHandler extends SensorEventHandler {
         SensorEventAvro eventAvro = SensorEventAvro.newBuilder()
                 .setHubId(event.getHubId())
                 .setId(event.getId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(data)
                 .build();
 

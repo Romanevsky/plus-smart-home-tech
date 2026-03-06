@@ -3,3 +3,6 @@ collector:
     topic:
       hubs: "telemetry.hubs.v1"
       sensors: "telemetry.sensors.v1"
+grpc:
+  server:
+    port: 9090

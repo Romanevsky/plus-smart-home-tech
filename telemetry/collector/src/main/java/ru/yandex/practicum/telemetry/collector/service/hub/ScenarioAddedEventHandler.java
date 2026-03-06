@@ -5,14 +5,15 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.ScenarioAddedEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioAddedEventAvro;
 import ru.yandex.practicum.telemetry.collector.config.CollectorClient;
 import ru.yandex.practicum.telemetry.collector.mapper.DeviceActionMapper;
 import ru.yandex.practicum.telemetry.collector.mapper.ScenarioConditionMapper;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEvent;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEventType;
-import ru.yandex.practicum.telemetry.collector.model.hub.ScenarioAddedEvent;
+
+import java.time.Instant;
 
 @Component
 public class ScenarioAddedEventHandler extends HubEventHandler {
@@ -24,23 +25,23 @@ public class ScenarioAddedEventHandler extends HubEventHandler {
     }
 
     @Override
-    public HubEventType getEventType() {
-        return HubEventType.SCENARIO_ADDED;
+    public HubEventProto.PayloadCase getEventType() {
+        return HubEventProto.PayloadCase.SCENARIO_ADDED;
     }
 
     @Override
-    public void handle(HubEvent event) {
-        ScenarioAddedEvent scenarioAddedEvent = (ScenarioAddedEvent) event;
+    public void handle(HubEventProto event) {
+        ScenarioAddedEventProto scenarioAddedEvent = event.getScenarioAdded();
 
         ScenarioAddedEventAvro data = ScenarioAddedEventAvro.newBuilder()
                 .setName(scenarioAddedEvent.getName())
-                .setActions(scenarioAddedEvent.getActions().stream().map(DeviceActionMapper::modelToAvro).toList())
-                .setConditions(scenarioAddedEvent.getConditions().stream().map(ScenarioConditionMapper::modelToAvro).toList())
+                .setActions(scenarioAddedEvent.getActionList().stream().map(DeviceActionMapper::protoToAvro).toList())
+                .setConditions(scenarioAddedEvent.getConditionList().stream().map(ScenarioConditionMapper::protoToAvro).toList())
                 .build();
 
         HubEventAvro eventAvro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(data)
                 .build();
 
