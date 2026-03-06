@@ -12,4 +12,3 @@ public class DeviceAction {
     private DeviceActionType type;
     private Integer value;
 }
-

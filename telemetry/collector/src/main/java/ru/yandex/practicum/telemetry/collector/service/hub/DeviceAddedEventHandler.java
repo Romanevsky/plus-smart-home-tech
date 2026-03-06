@@ -5,13 +5,14 @@ import org.apache.kafka.clients.producer.ProducerRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
+import ru.yandex.practicum.grpc.telemetry.event.DeviceAddedEventProto;
+import ru.yandex.practicum.grpc.telemetry.event.HubEventProto;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceAddedEventAvro;
 import ru.yandex.practicum.kafka.telemetry.event.DeviceTypeAvro;
 import ru.yandex.practicum.kafka.telemetry.event.HubEventAvro;
 import ru.yandex.practicum.telemetry.collector.config.CollectorClient;
-import ru.yandex.practicum.telemetry.collector.model.hub.DeviceAddedEvent;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEvent;
-import ru.yandex.practicum.telemetry.collector.model.hub.HubEventType;
+
+import java.time.Instant;
 
 @Component
 public class DeviceAddedEventHandler extends HubEventHandler {
@@ -23,22 +24,22 @@ public class DeviceAddedEventHandler extends HubEventHandler {
     }
 
     @Override
-    public HubEventType getEventType() {
-        return HubEventType.DEVICE_ADDED;
+    public HubEventProto.PayloadCase getEventType() {
+        return HubEventProto.PayloadCase.DEVICE_ADDED;
     }
 
     @Override
-    public void handle(HubEvent event) {
-        DeviceAddedEvent deviceAddedEvent = (DeviceAddedEvent) event;
+    public void handle(HubEventProto event) {
+        DeviceAddedEventProto deviceAddedEvent = event.getDeviceAdded();
 
         DeviceAddedEventAvro data = DeviceAddedEventAvro.newBuilder()
                 .setId(deviceAddedEvent.getId())
-                .setType(DeviceTypeAvro.valueOf(deviceAddedEvent.getDeviceType().toString()))
+                .setType(DeviceTypeAvro.valueOf(deviceAddedEvent.getType().toString()))
                 .build();
 
         HubEventAvro eventAvro = HubEventAvro.newBuilder()
                 .setHubId(event.getHubId())
-                .setTimestamp(event.getTimestamp())
+                .setTimestamp(Instant.ofEpochSecond(event.getTimestamp().getSeconds(), event.getTimestamp().getNanos()))
                 .setPayload(data)
                 .build();
 
