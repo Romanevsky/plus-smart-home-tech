@@ -1,8 +1,8 @@
 -- создаём таблицу scenarios
 CREATE TABLE IF NOT EXISTS scenarios (
     id BIGINT GENERATED ALWAYS AS IDENTITY PRIMARY KEY,
-    hub_id VARCHAR,
-    name VARCHAR,
+    hub_id VARCHAR(50),
+    name VARCHAR(100),
     UNIQUE(hub_id, name)
 );
 
