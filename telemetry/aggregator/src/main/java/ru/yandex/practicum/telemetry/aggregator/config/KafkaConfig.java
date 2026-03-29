@@ -13,7 +13,7 @@ import java.util.Properties;
 @ConfigurationProperties("aggregator.kafka")
 public class KafkaConfig {
 
-    private final Duration closeTimeout;
+    private Duration closeTimeout;
     private final ProducerConfig producer;
     private final ConsumerConfig consumer;
 
