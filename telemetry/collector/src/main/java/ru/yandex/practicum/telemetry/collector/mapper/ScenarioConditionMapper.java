@@ -1,10 +1,12 @@
 package ru.yandex.practicum.telemetry.collector.mapper;
 
+import lombok.experimental.UtilityClass;
 import ru.yandex.practicum.grpc.telemetry.event.ScenarioConditionProto;
 import ru.yandex.practicum.kafka.telemetry.event.ConditionOperationAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ConditionTypeAvro;
 import ru.yandex.practicum.kafka.telemetry.event.ScenarioConditionAvro;
 
+@UtilityClass
 public class ScenarioConditionMapper {
     public static ScenarioConditionAvro protoToAvro(ScenarioConditionProto condition) {
         return ScenarioConditionAvro.newBuilder()
