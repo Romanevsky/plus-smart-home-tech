@@ -36,15 +36,33 @@ services:
 
   postgres:
     image: postgres:16.1
-    container_name: postgres-telemetry
+    container_name: postgres
     ports:
       - "5432:5432"
     environment:
-      - POSTGRES_PASSWORD=telemetry
-      - POSTGRES_USER=telemetry
+      - POSTGRES_PASSWORD=postgrespass
+      - POSTGRES_USER=postgres
       - POSTGRES_DB=telemetry
     healthcheck:
       test: pg_isready -q -d $$POSTGRES_DB -U $$POSTGRES_USER
       timeout: 5s
       interval: 5s
       retries: 10
+
+  db-init:
+    image: postgres:16.1
+    container_name: db-init
+    depends_on:
+      postgres:
+        condition: service_healthy
+    entrypoint:
+      - bash
+      - -c
+      - |
+        set -e
+        psql postgresql://postgres:postgrespass@postgres:5432 -v ON_ERROR_STOP=1 <<-EOSQL
+        create database commerce_shopping_cart;
+        create database commerce_shopping_store;
+        create database commerce_warehouse;
+        EOSQL
+        
