@@ -1,17 +1,12 @@
-grpc:
-  server:
-    port: 9090
 spring:
-  main:
-    web-application-type: none
+  application:
+    name: collector
+  config:
+    import: configserver:http://localhost:8888
 
-collector:
-  kafka:
-    close-timeout: 5000ms
-    properties:
-      "bootstrap.servers": "localhost:9092"
-      "key.serializer": "org.apache.kafka.common.serialization.VoidSerializer"
-      "value.serializer": "ru.yandex.practicum.kafka.serializer.GenericAvroSerializer"
-    topic:
-      hubs: "telemetry.hubs.v1"
-      sensors: "telemetry.sensors.v1"
+cloud:
+  config:
+    fail-fast: true
+    retry:
+      useRandomPolicy: true
+      max-interval: 6000    

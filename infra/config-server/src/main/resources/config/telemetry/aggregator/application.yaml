@@ -1,0 +1,26 @@
+spring:
+  main:
+    web-application-type: none
+
+aggregator:
+  kafka:
+    bootstrap-servers: "localhost:9092"
+    close-timeout: 5000ms
+    producer:
+      topic: "telemetry.snapshots.v1"
+      properties:
+        "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
+        "key.serializer": "org.apache.kafka.common.serialization.VoidSerializer"
+        "value.serializer": "ru.yandex.practicum.kafka.serializer.GenericAvroSerializer"
+
+    consumer:
+      topic: "telemetry.sensors.v1"
+      properties:
+        "bootstrap.servers": ${aggregator.kafka.bootstrap-servers}
+        "enable.auto.commit": false
+        "group.id": "telemetry.aggregator.group"
+        "client.id": "aggregator.group.main"
+        "key.deserializer": "org.apache.kafka.common.serialization.VoidDeserializer"
+        "value.deserializer": "ru.yandex.practicum.kafka.serializer.SensorEventDeserializer"
+      poll-timeout: 100ms
+
