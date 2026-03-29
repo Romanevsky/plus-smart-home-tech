@@ -1,0 +1,16 @@
+spring:
+  datasource:
+    driverClassName: "org.postgresql.Driver"
+    url: "jdbc:postgresql://localhost:5432/commerce_shopping_cart"
+    username: "postgres"
+    password: "postgrespass"
+  sql.init.mode: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health, metrics, mappings
+
+server:
+  port: 0
