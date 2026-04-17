@@ -75,7 +75,7 @@ public class ShoppingStoreServiceImpl implements ShoppingStoreService {
     @Override
     public ProductDto getProductById(UUID productId) {
         ShoppingStoreProduct productInDb = shoppingStoreProductRepository.findById(productId)
-                .orElseThrow(() -> new ProductNotFoundException("Product with id %s not found for quantity update".formatted(productId)));
+                .orElseThrow(() -> new ProductNotFoundException("Product with id %s not found update".formatted(productId)));
         return mapper.dtoFromModel(productInDb);
     }
 }

@@ -1,14 +1,12 @@
 package ru.yandex.practicum.commerce.dto.warehouse;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @EqualsAndHashCode
+@ToString
 public class AddressDto {
     private String country;
     private String city;

@@ -64,5 +64,8 @@ services:
         create database commerce_shopping_cart;
         create database commerce_shopping_store;
         create database commerce_warehouse;
+        create database commerce_order;
+        create database commerce_payment;
+        create database commerce_delivery;
         EOSQL
         

@@ -1,15 +1,13 @@
 package ru.yandex.practicum.commerce.dto.warehouse;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Builder
 @EqualsAndHashCode
+@ToString
 public class BookedProductsDto {
     @NotNull
     private Double deliveryWeight;
