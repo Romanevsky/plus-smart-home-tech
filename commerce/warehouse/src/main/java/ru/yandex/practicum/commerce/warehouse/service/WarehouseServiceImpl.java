@@ -4,10 +4,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.yandex.practicum.commerce.dto.cart.ShoppingCartDto;
-import ru.yandex.practicum.commerce.dto.warehouse.AddProductToWarehouseRequest;
-import ru.yandex.practicum.commerce.dto.warehouse.AddressDto;
-import ru.yandex.practicum.commerce.dto.warehouse.BookedProductsDto;
-import ru.yandex.practicum.commerce.dto.warehouse.NewProductInWarehouseRequest;
+import ru.yandex.practicum.commerce.dto.warehouse.*;
 import ru.yandex.practicum.commerce.exception.NoSpecifiedProductInWarehouseException;
 import ru.yandex.practicum.commerce.exception.ProductInShoppingCartLowQuantityInWarehouseException;
 import ru.yandex.practicum.commerce.exception.SpecifiedProductAlreadyInWarehouseException;
@@ -77,6 +74,48 @@ public class WarehouseServiceImpl implements WarehouseService {
         WarehouseProduct productInDb = warehouseRepository.findById(id)
                 .orElseThrow(() -> new NoSpecifiedProductInWarehouseException("Product with UUID %s not found warehouse".formatted(id)));
         productInDb.setQuantity(productInDb.getQuantity() + request.getQuantity());
+        warehouseRepository.save(productInDb);
+    }
+
+    @Override
+    @Transactional
+    public void returnProducts(Map<UUID, Integer> products) {
+        List<WarehouseProduct> productsInDb = warehouseRepository.findAllById(products.keySet());
+        productsInDb.forEach(product -> {
+            UUID id = product.getProductId();
+            product.setQuantity(product.getQuantity() + products.get(id));
+        });
+        warehouseRepository.saveAll(productsInDb);
+    }
+
+    @Override
+    @Transactional
+    public BookedProductsDto assembleProducts(AssemblyProductsForOrderRequest request) {
+        Map<UUID, Integer> productsInRequest = request.getProducts();
+        List<WarehouseProduct> productsInWarehouse = warehouseRepository.findAllById(productsInRequest.keySet());
+        productsInWarehouse.forEach(product -> {
+            UUID id = product.getProductId();
+            long newQuantity = product.getQuantity() - productsInRequest.get(id);
+            if (newQuantity < 0) {
+                throw new ProductInShoppingCartLowQuantityInWarehouseException("Low product quantity in warehouse");
+            }
+            product.setQuantity(newQuantity);
+        });
+
+        Double totalVolume = productsInWarehouse.stream().map(product ->
+                        product.getDimension().getVolume() * productsInRequest.get(product.getProductId())).reduce(Double::sum)
+                .orElseThrow(() -> new IllegalStateException("Unable to calculate total volume for delivery"));
+        Double totalWeight = productsInWarehouse.stream().map(product ->
+                        product.getWeight() * productsInRequest.get(product.getProductId())).reduce(Double::sum)
+                .orElseThrow(() -> new IllegalStateException("Unable to calculate total weight for delivery"));
+        Boolean fragile = productsInWarehouse.stream().anyMatch(WarehouseProduct::getFragile);
+
+        warehouseRepository.saveAll(productsInWarehouse);
+        return BookedProductsDto.builder()
+                .deliveryVolume(totalVolume)
+                .deliveryWeight(totalWeight)
+                .fragile(fragile)
+                .build();
     }
 
     @Override

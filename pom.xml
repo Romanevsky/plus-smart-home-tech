@@ -92,6 +92,8 @@
                 <version>${grpc.version}</version>
             </dependency>
 
+            <!--    / GRPC dependencies management        -->
+
             <dependency>
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct</artifactId>
@@ -101,10 +103,8 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
-                <scope>provided</scope>
             </dependency>
 
-            <!--    / GRPC dependencies management        -->
         </dependencies>
     </dependencyManagement>
 
